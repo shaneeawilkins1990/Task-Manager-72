@@ -18,6 +18,7 @@ function saveTask(){
             data: JSON.stringify(taskToSave), //the mandatory stepconvert to obect into JSON format
             contentType: "application/json", // specify that the application is JSON
             success: function(response) {
+                displayTask( response || taskToSave ) // || means or
                 console.log(response);
                  
                 
@@ -38,9 +39,15 @@ function saveTask(){
 const serverName="https://106api-b0bnggbsgnezbzcz.westus3-01.azurewebsites.net/api/tasks"
 
 function updateTask(){
+    let btn = $(this); 
+    let element = btn.closet(".task");
+    let id = element.attr("id"); //id provided by server
+    console.log(id);
+    // 
+
     $.ajax({
          type: "PUT", //HTTP Verb: Update
-         url: "https://106api-b0bnggbsgnezbzcz.westus3-01.azurewebsites.net/api/tasks/1",
+         url: serverName + "/" + id,
          data: JSON.stringify({
             title: "Hello",
             budget: 99999,
@@ -91,7 +98,9 @@ function displayTask(task) {
         <label>Due: ${task.date}</label>
         <label>Budget: $${task.budget}</label>
       </div>
+      <button class="btn-edit">Edit</button>
       <button class="btn-delete">Delete</button>
+      
     </div>`;
 
   // Add to DOM
@@ -108,7 +117,20 @@ function deleteTask(){
     //3. get the ID
     let id = element.attr("id");
     console.log(id);
+
+    $.ajax({ // removing element, no need to convert the element
+        type: "DELETE", 
+        url: serverName + "/" + id, //concatenating the element
+        success: function(){
+            element.fadeOut(500, function(){ // does nt delete, nut helps user to see that something is happening, 500 milliseconds
+            $(this).remove();
+            }
+        )
+        }
+
+    })
 }
+
 
 function init() 
 {
@@ -118,6 +140,8 @@ function init()
     //Lets try this in to the delete button
     //$(".btn-delete").click(deleteTask);
     $(".list").on("click", ".btn-delete", deleteTask);
+    $(".list").on("click", ".btn-edit", updateTask);
+
 
 
     //load data from the sever by executing the loadTask function  
